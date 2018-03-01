@@ -1,0 +1,31 @@
+// tablestoJSON(): run this on a UWaterloo course page to get back a list of JSON objects
+//   similar to what you would get from an API call. Caution: may have to modify HTML to remove
+//   any other non-UW-course tables (no ids or anything, go figure)
+// replace API JSON data with this array
+function tablesToJSON() {
+    var tables = document.getElementsByTagName("table");
+    var formattedClasses = [];
+    for (var i = 0; i < tables.length-1; i++) {
+        var table = tables[i];
+        var c_info = table.rows[0].cells[0];
+        
+        //May fuckup
+        var prereq = table.rows[table.rows.length - 2].cells; //Collect all cells with the word Prereq, otherwise there are none
+        
+        console.log(prereq);
+        var course = {
+            course_id: table.rows[0].cells[1].innerText.split(": ")[1],
+            subject: c_info.innerText.split(" ")[0],
+            catalog_number: c_info.innerText.split(" ")[1],
+            title: table.rows[1].cells[0].innerText,
+            units: c_info.innerText.split(" ")[c_info.innerText.split(" ").length - 1], // Literally cancerous
+            description: table.rows[2].cells[0].innerText,
+            academic_level: "undergraduate",
+            prerequisite: ""
+            
+        };
+        formattedClasses.push(course);
+        
+    }
+    return formattedClasses;
+}
