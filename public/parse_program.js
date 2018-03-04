@@ -1,16 +1,22 @@
 
 
 // terrible practice, but dunno how to easily get out of callback
+// also note that you can just append JSON objects from file calls onto this and it
+// it *should* work, but I seem to be having issues with duplicate courses somehow
 var courses = [];
 
 // Going to be used later for keeping track of user courses, cache or cookie?
 var my_courses = [];
+
+// the visual graph
+var graph;
 
 
 $(document).ready(function(){
     $("#course_submit").submit(function(e){
         e.preventDefault();
         getProgram(document.getElementById("programSelect").value);
+        
     });
 });
 
@@ -19,58 +25,12 @@ $(document).ready(function(){
 //    program 'name'... this will be the entry point for the rest of the code
 function getProgram(name) {
    $.getJSON("data/" + name + ".json", function(json) {
-     $("#allOfIt").text(JSON.stringify(json));
+     $("#allOfIt").text(JSON.stringify(stripCourses(json))); //Used for debugging the program
+       courses = json;
+       graph = createGraph(stripCourses(courses));
    });
 }
 
-
-// getCoursesAPI(program): calls the UW API to get JSON of all the courses in a program
-// effects: ajax call
-//          mutates courses[]
-function getCoursesAPI(program){
-    
-    $.ajax({
-        url: "https://api.uwaterloo.ca/v2/courses/" + program + ".json",
-        data: {
-            key: "a2f3cc21d28368e740c424b0a35e08db"
-        },
-        cache: true,
-        type: "GET",
-        success: function(response) {
-            courses = response.data;
-        },
-        failure: function(xhr) {
-            console.log("Error");
-        }
-    })
-};
-
-
-// addPreReqs(): calls UW API to add the prereq's to all of the classes in courses
-// effects: ajax call
-//          mutates courses[]
-function addPreReqs() {
-    
-    for (var i = 0; i < courses.length-1; i++) {
-        var program_name = courses[i].subject;
-        var course_name = courses[i].catalog_number;
-        $.ajax({
-            async: false,
-            url: "https://api.uwaterloo.ca/v2/courses/" + program_name + "/" + course_name + "/prerequisites.json",
-            data: {
-                key: "a2f3cc21d28368e740c424b0a35e08db"
-            },
-            cache: true,
-            type: "GET",
-            success: function(response) {
-                courses[i].prerequisites = response["data"]["prerequisites_parsed"]
-            },
-            failure: function(xhr) {
-                console.log("Error");
-            }
-        })
-    }
-}
 
 
 /*   DEPRECATED
